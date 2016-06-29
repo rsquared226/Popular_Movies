@@ -33,6 +33,9 @@ public class MovieInfoAdapter extends ArrayAdapter<MovieInfo> {
         ImageView moviePoster = (ImageView) convertView.findViewById(R.id.movie_poster);
         Picasso.with(getContext()).load(movieInfo.getPictureUrl()).into(moviePoster); // Load image from web
 
+        // This is for accessibility service
+        moviePoster.setContentDescription(movieInfo.getName());
+
         return convertView;
     }
 }
