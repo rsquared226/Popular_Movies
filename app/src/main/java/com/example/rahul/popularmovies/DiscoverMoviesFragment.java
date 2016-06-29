@@ -6,6 +6,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
+
+import java.util.Arrays;
 
 
 /**
@@ -22,8 +25,23 @@ public class DiscoverMoviesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_discover_movies, container, false);
-    }
+        View rootView = inflater.inflate(R.layout.fragment_discover_movies, container, false);
 
+        MovieInfo[] movieInfos = {
+                new MovieInfo("Interstellar", "http://image.tmdb.org/t/p/w342/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
+                new MovieInfo("Interstellar", "http://image.tmdb.org/t/p/w342/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
+                new MovieInfo("Interstellar", "http://image.tmdb.org/t/p/w342/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
+                new MovieInfo("Interstellar", "http://image.tmdb.org/t/p/w342/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
+                new MovieInfo("Interstellar", "http://image.tmdb.org/t/p/w342/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
+                new MovieInfo("Interstellar", "http://image.tmdb.org/t/p/w342/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
+        };
+
+        MovieInfoAdapter movieInfoAdapter = new MovieInfoAdapter(getActivity(), Arrays.asList(movieInfos));
+
+        GridView movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
+        movieGrid.setAdapter(movieInfoAdapter);
+
+        // Inflate the layout for this fragment
+        return rootView;
+    }
 }
