@@ -16,6 +16,7 @@ import java.util.Arrays;
  */
 public class DiscoverMoviesFragment extends Fragment {
 
+    private MovieInfoAdapter movieInfoAdapter;
 
     public DiscoverMoviesFragment() {
         // Required empty public constructor
@@ -36,7 +37,7 @@ public class DiscoverMoviesFragment extends Fragment {
                 new MovieInfo("Interstellar", "http://image.tmdb.org/t/p/w342/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
         };
 
-        MovieInfoAdapter movieInfoAdapter = new MovieInfoAdapter(getActivity(), Arrays.asList(movieInfos));
+        movieInfoAdapter = new MovieInfoAdapter(getActivity(), Arrays.asList(movieInfos));
 
         GridView movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
         movieGrid.setAdapter(movieInfoAdapter);
@@ -44,4 +45,6 @@ public class DiscoverMoviesFragment extends Fragment {
         // Inflate the layout for this fragment
         return rootView;
     }
+
+
 }
