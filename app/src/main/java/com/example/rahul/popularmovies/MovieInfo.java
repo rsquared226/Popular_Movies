@@ -27,7 +27,7 @@ public class MovieInfo {
 
     private String getCompletePosterPath(String posterPath) {
         final String BASE_URL = "http://image.tmdb.org/t/p/";
-        final String SIZE = "w185";
+        final String SIZE = "w342"; //looks okay on N6, with fast loading
         return BASE_URL + SIZE + posterPath;
     }
 
