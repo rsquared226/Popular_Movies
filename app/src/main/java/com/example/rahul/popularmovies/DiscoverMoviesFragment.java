@@ -47,9 +47,9 @@ public class DiscoverMoviesFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_discover_movies, container, false);
 
-        new DownloadMovieData().execute(POPULAR);
-
         movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
+
+        new DownloadMovieData().execute(POPULAR);
 
         // Inflate the layout for this fragment
         return rootView;
