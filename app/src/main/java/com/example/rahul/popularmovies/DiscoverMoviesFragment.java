@@ -31,6 +31,7 @@ import java.util.ArrayList;
  */
 public class DiscoverMoviesFragment extends Fragment {
 
+    GridView movieGrid;
     private MovieInfoAdapter movieInfoAdapter;
 
     public DiscoverMoviesFragment() {
@@ -48,8 +49,7 @@ public class DiscoverMoviesFragment extends Fragment {
 
         new DownloadMovieData().execute(POPULAR);
 
-        GridView movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
-        movieGrid.setAdapter(movieInfoAdapter);
+        movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
 
         // Inflate the layout for this fragment
         return rootView;
@@ -137,7 +137,7 @@ public class DiscoverMoviesFragment extends Fragment {
 
                 movieJsonStr = buffer.toString();
 
-                Log.d(getClass().toString(), movieJsonStr);
+                Log.v(getClass().toString(), movieJsonStr);
             } catch (PackageManager.NameNotFoundException ex) {
                 Log.e(getClass().toString(), "API Key not found");
                 return null; // nothing can be done if the api key was not found
@@ -167,11 +167,17 @@ public class DiscoverMoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArrayList<MovieInfo> movieInfos) {
-            if (movieInfoAdapter == null) {
+            if (movieInfoAdapter == null) { // If it is not initialized, initialize it
                 movieInfoAdapter = new MovieInfoAdapter(getActivity(), movieInfos);
-            } else {
+            } else { // If it is, clear it and add data again
                 movieInfoAdapter.clear();
                 movieInfoAdapter.addAll(movieInfos);
+            }
+            movieGrid.setAdapter(movieInfoAdapter); //updates adapter
+
+            for (MovieInfo movieInfo :
+                    movieInfos) {
+                Log.v(getClass().toString(), movieInfo.toString());
             }
         }
     }

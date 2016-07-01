@@ -60,4 +60,12 @@ public class MovieInfo {
     public Date getRelease() {
         return release;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "\n" +
+                getPosterPath() + "\n" +
+                getRating() + "\n" +
+                getRelease();
+    }
 }
