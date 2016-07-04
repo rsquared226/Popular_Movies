@@ -32,9 +32,11 @@ import java.util.ArrayList;
  */
 public class DiscoverMoviesFragment extends Fragment {
 
+    // MOVIE_INFO_KEY is for writing and reading from Parcelables
     private static final String MOVIE_INFO_KEY = "movieInfos";
+    private static final String LOG_TAG = "DiscoverMoviesFragment";
+
     GridView movieGrid;
-    private MovieInfoAdapter movieInfoAdapter;
     private ArrayList<MovieInfo> movieInfos;
 
     public DiscoverMoviesFragment() {
@@ -45,8 +47,7 @@ public class DiscoverMoviesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_INFO_KEY)) {
-        } else {
+        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_INFO_KEY)) {
             movieInfos = savedInstanceState.getParcelableArrayList(MOVIE_INFO_KEY);
         }
     }
@@ -67,20 +68,23 @@ public class DiscoverMoviesFragment extends Fragment {
 
         movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
 
-        if (movieInfos == null) {
+        if (movieInfos == null) { // If moviesInfos was not in the savedInstanceState bundle, then access TMDB data
             new DownloadMovieData().execute(POPULAR);
-        } else {
-            if (movieInfoAdapter == null) { // If it is not initialized, initialize it
-                movieInfoAdapter = new MovieInfoAdapter(getActivity(), movieInfos);
-            } else { // If it is, clear it and add data again
-                movieInfoAdapter.clear();
-                movieInfoAdapter.addAll(movieInfos);
-            }
-            movieGrid.setAdapter(movieInfoAdapter); //updates adapter
+        } else { // If it was in the bundle, set it as the adapter
+            setMovieAdapter(movieInfos);
         }
 
-        // Inflate the layout for this fragment
         return rootView;
+    }
+
+    private void setMovieAdapter(ArrayList<MovieInfo> movieInfos) {
+        // Makes adapter based on movieInfos ArrayList
+        movieGrid.setAdapter(new MovieInfoAdapter(getActivity(), movieInfos));
+
+        for (MovieInfo movieInfo :
+                movieInfos) {
+            Log.v(LOG_TAG, movieInfo.toString());
+        }
     }
 
     private class DownloadMovieData extends AsyncTask<String, Void, ArrayList<MovieInfo>> {
@@ -96,6 +100,7 @@ public class DiscoverMoviesFragment extends Fragment {
             JSONArray movieArray = new JSONObject(movieJsonStr).getJSONArray(RESULTS);
             movieInfos = new ArrayList<>(movieArray.length());
 
+            // This loop adds a MovieInfo object to the ArrayAdapter
             for (int i = 0; i < movieArray.length(); i++) {
                 JSONObject movieData = movieArray.getJSONObject(i);
 
@@ -112,29 +117,24 @@ public class DiscoverMoviesFragment extends Fragment {
         @Override
         protected ArrayList<MovieInfo> doInBackground(String... strings) {
             if (strings.length == 0) {
-                return null; // Can't do anything without knowing which movies user wants
+                return null; // Can't do anything without knowing which type of movies user wants
             }
 
+            // String from the TMDB API
             String movieJsonStr;
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
             try {
-
-                ApplicationInfo ai = getActivity().getPackageManager().getApplicationInfo(getActivity().getPackageName(),
-                        PackageManager.GET_META_DATA);
-                Bundle bundle = ai.metaData;
-                final String API_KEY = bundle.getString("API_KEY");
-
                 final String BASE_URL = "http://api.themoviedb.org/3/movie";
                 final String APP_ID_PARAM = "api_key";
+                final String API_KEY = getApiKey();
 
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendPath(strings[0]) // Either popular movies or top rated
                         .appendQueryParameter(APP_ID_PARAM, API_KEY)
                         .build();
-
                 URL url = new URL(builtUri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -165,13 +165,13 @@ public class DiscoverMoviesFragment extends Fragment {
 
                 movieJsonStr = buffer.toString();
 
-                Log.v(getClass().toString(), movieJsonStr);
+                Log.v(LOG_TAG, movieJsonStr);
             } catch (PackageManager.NameNotFoundException ex) {
-                Log.e(getClass().toString(), "API Key not found");
-                return null; // nothing can be done if the api key was not found
+                Log.e(LOG_TAG, "API Key not found");
+                return null; // Nothing can be done if the api key was not found
             } catch (IOException ex) {
-                Log.e(getClass().toString(), ex.getMessage());
-                return null; // didn't get weather data
+                Log.e(LOG_TAG, ex.getMessage());
+                return null; // Didn't get data
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
@@ -180,7 +180,7 @@ public class DiscoverMoviesFragment extends Fragment {
                     try {
                         reader.close();
                     } catch (final IOException e) {
-                        Log.e(getClass().toString(), "Error closing stream", e);
+                        Log.e(LOG_TAG, "Error closing stream", e);
                     }
                 }
             }
@@ -188,25 +188,21 @@ public class DiscoverMoviesFragment extends Fragment {
             try {
                 return parseData(movieJsonStr);
             } catch (JSONException ex) {
-                Log.e(getClass().toString(), ex.getMessage());
+                Log.e(LOG_TAG, ex.getMessage());
                 return null;
             }
         }
 
         @Override
         protected void onPostExecute(ArrayList<MovieInfo> movieInfos) {
-            if (movieInfoAdapter == null) { // If it is not initialized, initialize it
-                movieInfoAdapter = new MovieInfoAdapter(getActivity(), movieInfos);
-            } else { // If it is, clear it and add data again
-                movieInfoAdapter.clear();
-                movieInfoAdapter.addAll(movieInfos);
-            }
-            movieGrid.setAdapter(movieInfoAdapter); //updates adapter
+            setMovieAdapter(movieInfos);
+        }
 
-            for (MovieInfo movieInfo :
-                    movieInfos) {
-                Log.v(getClass().toString(), movieInfo.toString());
-            }
+        private String getApiKey() throws PackageManager.NameNotFoundException {
+            ApplicationInfo ai = getActivity().getPackageManager().getApplicationInfo(getActivity().getPackageName(),
+                    PackageManager.GET_META_DATA);
+            Bundle bundle = ai.metaData;
+            return bundle.getString("API_KEY");
         }
     }
 }

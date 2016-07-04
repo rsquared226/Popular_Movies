@@ -13,6 +13,7 @@ import java.util.Locale;
  * Created by rahul on 6/25/16.
  */
 public class MovieInfo implements Parcelable {
+
     private String name;
     private String posterPath;
     private String overview;
@@ -27,6 +28,14 @@ public class MovieInfo implements Parcelable {
         this.rating = rating;
         this.release = parseDate(release);
         releaseStr = release;
+    }
+
+    private MovieInfo(Parcel in) {
+        name = in.readString();
+        posterPath = in.readString();
+        overview = in.readString();
+        rating = in.readDouble();
+        release = parseDate(in.readString());
     }
 
     private String getCompletePosterPath(String posterPath) {
@@ -76,14 +85,6 @@ public class MovieInfo implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
-    }
-
-    private MovieInfo(Parcel in) {
-        name = in.readString();
-        posterPath = in.readString();
-        overview = in.readString();
-        rating = in.readDouble();
-        release = parseDate(in.readString());
     }
 
     @Override
