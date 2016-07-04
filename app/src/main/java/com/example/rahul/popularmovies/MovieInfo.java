@@ -1,5 +1,7 @@
 package com.example.rahul.popularmovies;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import java.text.ParseException;
@@ -10,12 +12,13 @@ import java.util.Locale;
 /**
  * Created by rahul on 6/25/16.
  */
-public class MovieInfo {
+public class MovieInfo implements Parcelable {
     private String name;
     private String posterPath;
     private String overview;
     private double rating;
     private Date release;
+    private String releaseStr;
 
     public MovieInfo(String name, String posterPath, String overview, double rating, String release) {
         this.name = name;
@@ -23,6 +26,7 @@ public class MovieInfo {
         this.overview = overview;
         this.rating = rating;
         this.release = parseDate(release);
+        releaseStr = release;
     }
 
     private String getCompletePosterPath(String posterPath) {
@@ -68,4 +72,38 @@ public class MovieInfo {
                 getRating() + "\n" +
                 getRelease();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    private MovieInfo(Parcel in) {
+        name = in.readString();
+        posterPath = in.readString();
+        overview = in.readString();
+        rating = in.readDouble();
+        release = parseDate(in.readString());
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(getName());
+        parcel.writeString(getPosterPath());
+        parcel.writeString(getOverview());
+        parcel.writeDouble(getRating());
+        parcel.writeString(releaseStr);
+    }
+
+    public final Parcelable.Creator<MovieInfo> CREATOR = new Parcelable.Creator<MovieInfo>() {
+        @Override
+        public MovieInfo createFromParcel(Parcel parcel) {
+            return new MovieInfo(parcel);
+        }
+
+        @Override
+        public MovieInfo[] newArray(int i) {
+            return new MovieInfo[i];
+        }
+    };
 }

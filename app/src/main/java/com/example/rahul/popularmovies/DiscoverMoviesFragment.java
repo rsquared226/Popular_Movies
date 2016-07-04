@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,13 +32,30 @@ import java.util.ArrayList;
  */
 public class DiscoverMoviesFragment extends Fragment {
 
+    private static final String MOVIE_INFO_KEY = "movieInfos";
     GridView movieGrid;
     private MovieInfoAdapter movieInfoAdapter;
+    private ArrayList<MovieInfo> movieInfos;
 
     public DiscoverMoviesFragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_INFO_KEY)) {
+        } else {
+            movieInfos = savedInstanceState.getParcelableArrayList(MOVIE_INFO_KEY);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(MOVIE_INFO_KEY, movieInfos);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,7 +67,17 @@ public class DiscoverMoviesFragment extends Fragment {
 
         movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
 
-        new DownloadMovieData().execute(POPULAR);
+        if (movieInfos == null) {
+            new DownloadMovieData().execute(POPULAR);
+        } else {
+            if (movieInfoAdapter == null) { // If it is not initialized, initialize it
+                movieInfoAdapter = new MovieInfoAdapter(getActivity(), movieInfos);
+            } else { // If it is, clear it and add data again
+                movieInfoAdapter.clear();
+                movieInfoAdapter.addAll(movieInfos);
+            }
+            movieGrid.setAdapter(movieInfoAdapter); //updates adapter
+        }
 
         // Inflate the layout for this fragment
         return rootView;
@@ -66,7 +94,7 @@ public class DiscoverMoviesFragment extends Fragment {
             final String RATING = "vote_average";
 
             JSONArray movieArray = new JSONObject(movieJsonStr).getJSONArray(RESULTS);
-            ArrayList<MovieInfo> movieInfos = new ArrayList<>(movieArray.length());
+            movieInfos = new ArrayList<>(movieArray.length());
 
             for (int i = 0; i < movieArray.length(); i++) {
                 JSONObject movieData = movieArray.getJSONObject(i);
