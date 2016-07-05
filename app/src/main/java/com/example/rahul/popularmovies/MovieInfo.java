@@ -20,14 +20,16 @@ public class MovieInfo implements Parcelable {
     private double rating;
     private Date release;
     private String releaseStr;
+    private String backdropPath;
 
-    public MovieInfo(String name, String posterPath, String overview, double rating, String release) {
+    public MovieInfo(String name, String posterPath, String overview, double rating, String release, String backdropPath) {
         this.name = name;
         this.posterPath = getCompletePosterPath(posterPath);
         this.overview = overview;
         this.rating = rating;
         this.release = parseDate(release);
         releaseStr = release;
+        this.backdropPath = getCompletePosterPath(backdropPath);
     }
 
     private MovieInfo(Parcel in) {
@@ -36,6 +38,7 @@ public class MovieInfo implements Parcelable {
         overview = in.readString();
         rating = in.readDouble();
         release = parseDate(in.readString());
+        backdropPath = in.readString();
     }
 
     private String getCompletePosterPath(String posterPath) {
@@ -74,6 +77,10 @@ public class MovieInfo implements Parcelable {
         return release;
     }
 
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
     @Override
     public String toString() {
         return getName() + "\n" +
@@ -94,9 +101,10 @@ public class MovieInfo implements Parcelable {
         parcel.writeString(getOverview());
         parcel.writeDouble(getRating());
         parcel.writeString(releaseStr);
+        parcel.writeString(getBackdropPath());
     }
 
-    public final Parcelable.Creator<MovieInfo> CREATOR = new Parcelable.Creator<MovieInfo>() {
+    public static final Parcelable.Creator<MovieInfo> CREATOR = new Parcelable.Creator<MovieInfo>() {
         @Override
         public MovieInfo createFromParcel(Parcel parcel) {
             return new MovieInfo(parcel);

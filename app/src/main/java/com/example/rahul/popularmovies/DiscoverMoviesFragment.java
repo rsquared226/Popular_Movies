@@ -1,6 +1,7 @@
 package com.example.rahul.popularmovies;
 
 
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -38,6 +40,7 @@ public class DiscoverMoviesFragment extends Fragment {
 
     GridView movieGrid;
     private ArrayList<MovieInfo> movieInfos;
+    private MovieInfoAdapter movieInfoAdapter;
 
     public DiscoverMoviesFragment() {
         // Required empty public constructor
@@ -74,12 +77,21 @@ public class DiscoverMoviesFragment extends Fragment {
             setMovieAdapter(movieInfos);
         }
 
+        movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                startActivity(new Intent(getActivity(), MovieDetailActivity.class)
+                        .putExtra("movieDetail", movieInfoAdapter.getItem(position)));
+            }
+        });
+
         return rootView;
     }
 
     private void setMovieAdapter(ArrayList<MovieInfo> movieInfos) {
         // Makes adapter based on movieInfos ArrayList
-        movieGrid.setAdapter(new MovieInfoAdapter(getActivity(), movieInfos));
+        movieInfoAdapter = new MovieInfoAdapter(getActivity(), movieInfos);
+        movieGrid.setAdapter(movieInfoAdapter);
 
         for (MovieInfo movieInfo :
                 movieInfos) {
@@ -96,6 +108,7 @@ public class DiscoverMoviesFragment extends Fragment {
             final String RELEASE = "release_date";
             final String TITLE = "original_title";
             final String RATING = "vote_average";
+            final String BACKDROP = "backdrop_path";
 
             JSONArray movieArray = new JSONObject(movieJsonStr).getJSONArray(RESULTS);
             movieInfos = new ArrayList<>(movieArray.length());
@@ -108,7 +121,8 @@ public class DiscoverMoviesFragment extends Fragment {
                         movieData.getString(POSTER),
                         movieData.getString(OVERVIEW),
                         movieData.getDouble(RATING),
-                        movieData.getString(RELEASE)));
+                        movieData.getString(RELEASE),
+                        movieData.getString(BACKDROP)));
             }
 
             return movieInfos;
