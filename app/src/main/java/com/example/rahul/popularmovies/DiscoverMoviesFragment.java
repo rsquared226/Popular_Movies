@@ -1,9 +1,12 @@
 package com.example.rahul.popularmovies;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -72,7 +75,10 @@ public class DiscoverMoviesFragment extends Fragment {
         movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
 
         if (movieInfos == null) { // If moviesInfos was not in the savedInstanceState bundle, then access TMDB data
-            new DownloadMovieData().execute(POPULAR);
+            if (isOnline()) {
+                (rootView.findViewById(R.id.image_offline)).setVisibility(View.GONE);
+                new DownloadMovieData().execute(POPULAR);
+            }
         } else { // If it was in the bundle, set it as the adapter
             setMovieAdapter(movieInfos);
         }
@@ -97,6 +103,13 @@ public class DiscoverMoviesFragment extends Fragment {
                 movieInfos) {
             Log.v(LOG_TAG, movieInfo.toString());
         }
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     private class DownloadMovieData extends AsyncTask<String, Void, ArrayList<MovieInfo>> {

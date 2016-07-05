@@ -4,6 +4,14 @@
     android:layout_height="match_parent"
     tools:context="com.example.rahul.popularmovies.DiscoverMoviesFragment">
 
+    <ImageView
+        android:id="@+id/image_offline"
+        android:src="@drawable/offline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"/>
+
     <GridView
         android:id="@+id/movie_grid"
         android:layout_width="match_parent"
