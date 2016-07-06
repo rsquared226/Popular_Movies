@@ -14,10 +14,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +45,13 @@ public class DiscoverMoviesFragment extends Fragment {
     private static final String MOVIE_INFO_KEY = "movieInfos";
     private static final String LOG_TAG = "DiscoverMoviesFragment";
 
+    private static final String POPULAR = "popular";
+    private static final String TOP_RATED = "top_rated";
+    private static final String TOP_RATED_MENU = "Show top rated movies";
+    private static final String POPULAR_MENU = "Show popular movies";
+
     GridView movieGrid;
+    ImageView offlineImage;
     private ArrayList<MovieInfo> movieInfos;
     private MovieInfoAdapter movieInfoAdapter;
 
@@ -53,9 +63,40 @@ public class DiscoverMoviesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
         if (savedInstanceState != null && savedInstanceState.containsKey(MOVIE_INFO_KEY)) {
             movieInfos = savedInstanceState.getParcelableArrayList(MOVIE_INFO_KEY);
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.discover_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.switch_movies && isOnline()) {
+            movieGrid.setVisibility(View.VISIBLE);
+            offlineImage.setVisibility(View.GONE);
+
+            if (item.getTitle().equals(TOP_RATED_MENU)) {
+                Log.d(LOG_TAG, "switch to " + TOP_RATED);
+                new DownloadMovieData().execute(TOP_RATED);
+                item.setTitle(POPULAR_MENU);
+            } else {
+                Log.d(LOG_TAG, "switch to " + POPULAR);
+                new DownloadMovieData().execute(POPULAR);
+                item.setTitle(TOP_RATED_MENU);
+            }
+            return true;
+        } else {
+            movieGrid.setVisibility(View.GONE);
+            offlineImage.setVisibility(View.VISIBLE);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -67,17 +108,20 @@ public class DiscoverMoviesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final String POPULAR = "popular";
-        final String TOP_RATED = "top_rated";
-
         View rootView = inflater.inflate(R.layout.fragment_discover_movies, container, false);
 
         movieGrid = (GridView) rootView.findViewById(R.id.movie_grid);
+        offlineImage = (ImageView) rootView.findViewById(R.id.image_offline);
+        offlineImage.setVisibility(View.GONE); // Make sure it is not visible when the device rotates
 
         if (movieInfos == null) { // If moviesInfos was not in the savedInstanceState bundle, then access TMDB data
-            if (isOnline()) {
-                (rootView.findViewById(R.id.image_offline)).setVisibility(View.GONE);
+            if (isOnline()) { // If it is online, get the data
+                movieGrid.setVisibility(View.VISIBLE);
+                offlineImage.setVisibility(View.GONE);
                 new DownloadMovieData().execute(POPULAR);
+            } else { // If it is offline, show an image that says the user is offline
+                movieGrid.setVisibility(View.GONE);
+                offlineImage.setVisibility(View.VISIBLE);
             }
         } else { // If it was in the bundle, set it as the adapter
             setMovieAdapter(movieInfos);

@@ -23,7 +23,8 @@
             android:name="API_KEY"
             android:value="" />
 
-        <activity android:name=".MovieDetailActivity" />
+        <activity android:name=".MovieDetailActivity"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

@@ -3,5 +3,5 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="discover_margins">2dp</dimen>
+    <dimen name="margins">16dp</dimen>
 </resources>
